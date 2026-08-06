@@ -96,3 +96,5 @@ jobs:
             echo "- 이번 실행 오류: ${{ steps.monitor.outputs.run_errors || '확인 불가' }}개"
             echo "- 알림 이슈 생성: ${{ steps.monitor.outputs.alert || 'false' }}"
           } >> "$GITHUB_STEP_SUMMARY"
+
+# Initial deployment trigger: 2026-08-07 KST
