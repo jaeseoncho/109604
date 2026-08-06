@@ -93,7 +93,7 @@ jobs:
             echo "## 위너에어컨 정책 모니터"
             echo ""
             echo "- 결과: ${{ steps.monitor.outputs.severity || '실행 실패' }}"
-            echo "- 확인 성공: ${{ steps.monitor.outputs.successful_sources || '0' }}/${{ steps.monitor.outputs.total_sources || '15' }}개 공식 출처"
+            echo "- 확인 성공: ${{ steps.monitor.outputs.successful_sources || '0' }}/${{ steps.monitor.outputs.total_sources || '17' }}개 공식 출처"
             echo "- 이번 실행 오류: ${{ steps.monitor.outputs.run_errors || '확인 불가' }}개"
             echo "- 알림 이슈 생성: ${{ steps.monitor.outputs.alert || 'false' }}"
           } >> "$GITHUB_STEP_SUMMARY"
