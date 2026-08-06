@@ -1,5 +1,7 @@
 # 위너에어컨 정책 변경 모니터
 
+[![Winner Aircon policy monitor](https://github.com/jaeseoncho/109604/actions/workflows/policy-monitor.yml/badge.svg)](https://github.com/jaeseoncho/109604/actions/workflows/policy-monitor.yml)
+
 네이버 스마트스토어 판매자 정책, 대한민국 전자상거래·통신판매업 규정, 에어컨 온라인 판매 관련 안전·효율 표시 기준을 매일 확인하고 **판매 운영에 영향을 주는 관련 문구가 바뀐 경우에만 GitHub 이슈로 알리는 자동화**입니다.
 
 ## 작동 방식
