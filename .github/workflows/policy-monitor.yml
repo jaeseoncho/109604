@@ -1,0 +1,98 @@
+name: Winner Aircon policy monitor
+
+on:
+  schedule:
+    # 00:17 UTC = 09:17 KST. Scheduled jobs can start a few minutes late.
+    - cron: "17 0 * * *"
+  workflow_dispatch:
+  push:
+    paths:
+      - "policy_monitor.py"
+      - "sources.json"
+      - ".github/workflows/policy-monitor.yml"
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: winner-aircon-policy-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Check official policy sources
+        id: monitor
+        shell: bash
+        run: |
+          set -euo pipefail
+          python policy_monitor.py
+          python - <<'PY'
+          import json
+          import os
+
+          with open("monitor_result.json", encoding="utf-8") as file:
+              result = json.load(file)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"alert={'true' if result['alert'] else 'false'}\n")
+              output.write("title<<POLICY_TITLE\n")
+              output.write(result.get("title", "") + "\n")
+              output.write("POLICY_TITLE\n")
+              output.write(f"severity={result.get('severity', '')}\n")
+              output.write(f"successful_sources={result.get('successful_sources', 0)}\n")
+              output.write(f"total_sources={result.get('total_sources', 0)}\n")
+              output.write(f"run_errors={result.get('run_errors', 0)}\n")
+          PY
+
+      - name: Open an assigned policy alert issue
+        if: steps.monitor.outputs.alert == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_TITLE: ${{ steps.monitor.outputs.title }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh issue create \
+            --title "$ISSUE_TITLE" \
+            --body-file policy_change_report.md \
+            --assignee "${{ github.repository_owner }}"
+
+      - name: Save comparison baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "winner-aircon-policy-monitor[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --force state/policy_state.json
+          if git diff --cached --quiet; then
+            echo "No state update to commit."
+          else
+            git commit -m "chore: update policy monitor state [skip ci]"
+            git push
+          fi
+
+      - name: Add run summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## 위너에어컨 정책 모니터"
+            echo ""
+            echo "- 결과: ${{ steps.monitor.outputs.severity || '실행 실패' }}"
+            echo "- 확인 성공: ${{ steps.monitor.outputs.successful_sources || '0' }}/${{ steps.monitor.outputs.total_sources || '15' }}개 공식 출처"
+            echo "- 이번 실행 오류: ${{ steps.monitor.outputs.run_errors || '확인 불가' }}개"
+            echo "- 알림 이슈 생성: ${{ steps.monitor.outputs.alert || 'false' }}"
+          } >> "$GITHUB_STEP_SUMMARY"
