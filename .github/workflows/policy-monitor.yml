@@ -2,6 +2,8 @@ name: Winner Aircon policy monitor
 
 on:
   schedule:
+    # Temporary five-minute validation trigger; remove after the first baseline.
+    - cron: "*/5 * * * *"
     # 00:17 UTC = 09:17 KST. Scheduled jobs can start a few minutes late.
     - cron: "17 0 * * *"
   workflow_dispatch:
