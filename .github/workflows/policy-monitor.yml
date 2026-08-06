@@ -81,7 +81,8 @@ jobs:
             echo "No state update to commit."
           else
             git commit -m "chore: update policy monitor state [skip ci]"
-            git push
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           fi
 
       - name: Add run summary
