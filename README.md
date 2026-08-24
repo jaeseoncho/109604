@@ -53,6 +53,10 @@
 
 GitHub 저장소의 **Actions → Winner Aircon policy monitor → Run workflow**에서 즉시 실행할 수 있습니다.
 
+## ComfyUI MCP
+
+이 저장소에는 Claude Code에서 ComfyUI를 조작할 수 있는 공식 Comfy MCP 서버 설정([`.mcp.json`](.mcp.json))이 포함되어 있습니다. 설치와 사용 방법은 [`docs/COMFYUI_MCP_SETUP.md`](docs/COMFYUI_MCP_SETUP.md)를 참고하세요.
+
 ## 파일 구성
 
 - `.github/workflows/policy-monitor.yml` — 매일 실행 및 이슈 생성
