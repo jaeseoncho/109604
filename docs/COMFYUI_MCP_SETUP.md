@@ -74,7 +74,25 @@ claude mcp add --transport http comfy-cloud https://cloud.comfy.org/mcp
 
 이후 Claude Code에서 `/mcp`를 열어 로그인(OAuth)을 완료합니다. 자세한 내용은 [Comfy 공식 문서](https://docs.comfy.org/agent-tools/mcp)를 참고하세요.
 
-## 5. 환경 변수 정리
+## 5. Codex CLI에서 사용
+
+OpenAI Codex CLI는 `~/.codex/config.toml`에 MCP 서버를 등록합니다:
+
+```bash
+codex mcp add comfyui --env COMFYUI_URL=http://127.0.0.1:8188 -- comfy-mcp
+```
+
+`codex mcp` 명령이 없는 버전이면 `~/.codex/config.toml`에 직접 추가합니다:
+
+```toml
+[mcp_servers.comfyui]
+command = "comfy-mcp"
+env = { "COMFYUI_URL" = "http://127.0.0.1:8188" }
+```
+
+`comfy-mcp`가 PATH에 없으면 `command`에 절대 경로를 지정하세요. 등록 확인은 `codex mcp list`. ComfyUI 본체(`comfy launch`)가 실행 중이어야 하는 것은 동일하며, 같은 서버를 Claude Code와 Codex가 동시에 사용할 수 있습니다.
+
+## 6. 환경 변수 정리
 
 | 변수 | 용도 |
 |------|------|
@@ -84,7 +102,7 @@ claude mcp add --transport http comfy-cloud https://cloud.comfy.org/mcp
 | `COMFY_API_KEY` | Comfy 파트너 API 노드용 자격 증명 (선택) |
 | `COMFY_MCP_DEBUG_LOG` | 실패 로그 활성화 (문제 해결용) |
 
-## 6. 문제 해결
+## 7. 문제 해결
 
 - **서버가 연결되지 않음** — `comfy-mcp`가 PATH에 있는지 확인: `which comfy-mcp`. 가상환경에 설치했다면 `.mcp.json`의 `command`를 절대 경로로 바꾸거나 `COMFY_BIN`을 지정하세요.
 - **도구 호출이 실패함** — ComfyUI 본체가 실행 중인지, `COMFYUI_URL` 주소로 브라우저 접속이 되는지 확인하세요.
