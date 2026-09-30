@@ -10,6 +10,7 @@ on:
       - "policy_monitor.py"
       - "sources.json"
       - "sources_extra.json"
+      - "tests/**"
       - ".github/workflows/policy-monitor.yml"
 
 permissions:
@@ -34,6 +35,9 @@ jobs:
         with:
           python-version: "3.13"
 
+      - name: Test comparison baseline persistence
+        run: python -m unittest discover -s tests -v
+
       - name: Prepare runtime configuration
         shell: bash
         run: |
@@ -57,8 +61,9 @@ jobs:
           python - <<'PY'
           from pathlib import Path
 
-          path = Path("policy_monitor.py")
-          text = path.read_text(encoding="utf-8")
+          # Keep tracked source clean so saving the baseline can rebase safely.
+          path = Path("runtime_policy_monitor.py")
+          text = Path("policy_monitor.py").read_text(encoding="utf-8")
           replacements = {
               "def fetch_html(url: str, attempts: int = 3, timeout: int = 45)":
                   "def fetch_html(url: str, attempts: int = 2, timeout: int = 12)",
@@ -77,7 +82,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python policy_monitor.py --config runtime_sources.json
+          python runtime_policy_monitor.py --config runtime_sources.json
           python - <<'PY'
           import json
           import os
