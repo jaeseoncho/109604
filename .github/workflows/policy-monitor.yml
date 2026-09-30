@@ -10,6 +10,7 @@ on:
       - "policy_monitor.py"
       - "sources.json"
       - "sources_extra.json"
+      - "tests/**"
       - ".github/workflows/policy-monitor.yml"
 
 permissions:
