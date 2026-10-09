@@ -53,7 +53,7 @@
         "항목별 정산 내역"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "naver-product-registration": {
       "name": "스마트스토어 상품등록·수정 도움말",
@@ -213,7 +213,7 @@
         "해외구매대행 상품으로 이전에는 KC인증 없이 상품판매를 했는데, 현재는 KC인증을 받아야 한다고 노출돼요."
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "naver-product-kc-exposure": {
       "name": "스마트스토어 상품정보·KC·쇼핑노출 도움말",
@@ -369,7 +369,7 @@
         "해외구매대행 상품의 경우 KC인증정보는 어떻게 기재하나요?"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "naver-seller-info": {
       "name": "스마트스토어 판매자 정보·운영상태 도움말",
@@ -412,7 +412,7 @@
         "휴업(폐업)으로 인해 이용정지가 되었습니다. 어떻게 해제할 수 있나요?"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "naver-telecom-reporting-threshold": {
       "name": "스마트스토어 통신판매업 신고번호 입력 기준",
@@ -451,7 +451,7 @@
         "통신판매업 신고번호 입력기준"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "naver-business-conversion": {
       "name": "스마트스토어 개인→사업자 전환 도움말",
@@ -505,7 +505,7 @@
         "항목별 정산 내역"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "naver-account-manager": {
       "name": "스마트스토어 계정·매니저 권한 도움말",
@@ -541,14 +541,14 @@
         "항목별 정산 내역"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "naver-review-exposure": {
       "name": "스마트스토어 리뷰·스토어 노출 도움말",
       "url": "https://help.sell.smartstore.naver.com/faq/content.help?faqId=4424",
-      "failure_count": 12,
+      "failure_count": 13,
       "last_error": "fetch failed after 2 attempts: HTTP Error 500: Internal Server Error",
-      "last_failure_at": "2026-10-08T15:03:37+09:00"
+      "last_failure_at": "2026-10-09T15:08:20+09:00"
     },
     "ecommerce-act": {
       "name": "전자상거래 등에서의 소비자보호에 관한 법률",
@@ -565,7 +565,7 @@
         "제정·개정이유"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "ecommerce-decree": {
       "name": "전자상거래법 시행령",
@@ -582,7 +582,7 @@
         "제정·개정이유"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "ecommerce-rule": {
       "name": "전자상거래법 시행규칙",
@@ -601,7 +601,7 @@
         "제정·개정이유"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "product-information-notice": {
       "name": "전자상거래 상품 등의 정보제공 고시",
@@ -613,7 +613,7 @@
         "제정·개정이유"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "gov24-registration": {
       "name": "정부24 통신판매업 신규 신고",
@@ -636,7 +636,7 @@
         "통신판매업신고 | 민원안내 및 신청 | 정부24"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "gov24-change": {
       "name": "정부24 통신판매업 변경 신고",
@@ -655,7 +655,7 @@
         "통신판매업 변경신고서 (전자상거래 등에서의 소비자보호에 관한 법률 시행규칙: 별지 서식 4호)"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "gov24-suspend-close-reopen": {
       "name": "정부24 통신판매업 휴업·폐업·영업재개 신고",
@@ -672,7 +672,7 @@
         "통신판매업 휴업ᆞ폐업ᆞ영업재개 신고서 (전자상거래 등에서의 소비자보호에 관한 법률 시행규칙: 별지 서식 5호)"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "electrical-safety-rule": {
       "name": "전기용품 및 생활용품 안전관리법 시행규칙",
@@ -689,7 +689,7 @@
         "제정·개정이유"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "efficiency-regulation": {
       "name": "효율관리기자재 운용규정",
@@ -704,7 +704,7 @@
         "효율관리기자재운용규정"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     },
     "energy-agency-aircon-notices": {
       "name": "한국에너지공단 냉방기·냉난방기 효율 자료실",
@@ -728,8 +728,8 @@
         "효율등급제도"
       ],
       "failure_count": 0,
-      "last_success_at": "2026-10-08T15:03:37+09:00"
+      "last_success_at": "2026-10-09T15:08:20+09:00"
     }
   },
-  "last_checked_at": "2026-10-08T15:03:37+09:00"
+  "last_checked_at": "2026-10-09T15:08:20+09:00"
 }
