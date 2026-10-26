@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "comfyui": {
+      "type": "stdio",
+      "command": "comfy-mcp",
+      "args": [],
+      "env": {
+        "COMFYUI_URL": "${COMFYUI_URL:-http://127.0.0.1:8188}"
+      }
+    }
+  }
+}
