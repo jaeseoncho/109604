@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>블로그 점검 도구</title>
+<meta name="description" content="구리·남양주 위너에어컨 네이버 블로그 발행 전 검사기, 블로그 상태 기록표, 개선 체크리스트">
+<style>
+  :root{
+    --bg:#f4f6fa; --card:#ffffff; --ink:#1f2937; --muted:#6b7280; --line:#e5e9f0;
+    --blue:#004E82; --blue-soft:#e6f0f8; --green:#0d7a4f; --green-soft:#eaf7f0;
+    --amber:#b45309; --amber-soft:#fff4e0; --red:#c2410c; --red-soft:#fdecec;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);color:var(--ink);line-height:1.7;font-size:16px}
+  header{background:var(--card);border-bottom:1px solid var(--line);padding:18px 16px}
+  .wrap{max-width:900px;margin:0 auto;padding:0 16px 60px}
+  header .wrap{padding:0 16px}
+  h1{font-size:22px;color:var(--blue);font-weight:800}
+  header p{color:var(--muted);font-size:14px;margin-top:4px}
+  .tabs{display:flex;gap:8px;margin:18px 0 14px;flex-wrap:wrap}
+  .tabs button{flex:1;min-width:150px;padding:12px 10px;border:1px solid var(--line);background:var(--card);border-radius:12px;font-size:15px;font-weight:700;color:var(--ink);cursor:pointer}
+  .tabs button.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .panel{display:none}
+  .panel.active{display:block}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 18px;margin-bottom:16px}
+  .card h2{font-size:18px;color:var(--blue);margin-bottom:10px;font-weight:800}
+  .card h3{font-size:15.5px;margin:14px 0 8px;font-weight:800}
+  .hint{font-size:14px;color:var(--muted);margin-bottom:10px}
+  label{display:block;font-weight:700;font-size:14.5px;margin:12px 0 6px}
+  input[type=text],input[type=number],input[type=date],textarea,select{width:100%;padding:11px 12px;border:1px solid #cfd6e0;border-radius:10px;font-size:15px;font-family:inherit;background:#fff}
+  textarea{min-height:220px;resize:vertical}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media (max-width:600px){.row{grid-template-columns:1fr}}
+  .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .btn{padding:11px 16px;border-radius:10px;border:1px solid var(--blue);background:var(--blue);color:#fff;font-size:15px;font-weight:700;cursor:pointer}
+  .btn.secondary{background:#fff;color:var(--blue)}
+  .btn.ghost{background:#fff;color:var(--muted);border-color:#cfd6e0}
+  .btn:active{transform:translateY(1px)}
+  .result{margin-top:18px}
+  .score{display:flex;align-items:center;gap:14px;padding:16px;border-radius:12px;background:var(--blue-soft);margin-bottom:12px;flex-wrap:wrap}
+  .score .num{font-size:36px;font-weight:900;color:var(--blue)}
+  .score .desc{font-size:15px}
+  .item{display:flex;gap:10px;padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:14.5px;border:1px solid var(--line)}
+  .item .tag{flex:none;font-weight:800;font-size:12.5px;padding:2px 8px;border-radius:6px;height:fit-content;margin-top:3px}
+  .item.pass{background:var(--green-soft)} .item.pass .tag{background:var(--green);color:#fff}
+  .item.warn{background:var(--amber-soft)} .item.warn .tag{background:var(--amber);color:#fff}
+  .item.fail{background:var(--red-soft)} .item.fail .tag{background:var(--red);color:#fff}
+  .item.info{background:#f8fafc} .item.info .tag{background:#94a3b8;color:#fff}
+  .item b{color:var(--blue)}
+  .msg{font-size:14px;color:var(--green);margin-top:8px;min-height:20px}
+  .msg.err{color:var(--red)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px}
+  th,td{border:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+  th{background:#f8fafc}
+  .tablewrap{overflow-x:auto}
+  .check{display:flex;gap:10px;align-items:flex-start;padding:10px 8px;border-bottom:1px dashed var(--line);font-size:14.5px}
+  .check input{width:20px;height:20px;margin-top:4px;flex:none}
+  .check.done{color:var(--muted);text-decoration:line-through}
+  .phase{margin-top:14px;font-weight:800;color:var(--blue);font-size:15px}
+  .progress{height:10px;background:#e5e9f0;border-radius:99px;overflow:hidden;margin:8px 0 4px}
+  .progress div{height:100%;background:var(--blue);width:0}
+  .small{font-size:13px;color:var(--muted)}
+  .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  @media (max-width:600px){.kv{grid-template-columns:1fr}}
+  .kv div{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+  .kv b{display:block;color:var(--blue);font-size:17px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>위너에어컨 블로그 점검 도구</h1>
+    <p>blog.naver.com/as1096 · 발행 전 검사 · 블로그 상태 기록 · 개선 체크리스트 (모든 자료는 이 컴퓨터 안에만 저장됩니다)</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="active" data-tab="check">① 발행 전 검사</button>
+    <button data-tab="stats">② 블로그 상태 기록</button>
+    <button data-tab="plan">③ 개선 체크리스트</button>
+  </div>
+
+  <!-- ① 발행 전 검사 -->
+  <section class="panel active" id="tab-check">
+    <div class="card">
+      <h2>발행 전 검사기</h2>
+      <p class="hint">네이버 에디터에 넣을 <b>제목과 본문(글자만)</b>을 붙여넣고 <b>검사하기</b>를 누르세요. HTML 코드가 아니라 실제 글 내용을 넣습니다.</p>
+      <label for="kw">핵심 키워드 (검색어 1개, 예: 냉난방기 평형 계산)</label>
+      <input type="text" id="kw" placeholder="예: 냉난방기 평형 계산">
+      <label for="title">제목</label>
+      <input type="text" id="title" placeholder="예: 냉난방기 평형 계산, 매장은 바닥 평수만 보면 안 되는 이유">
+      <label for="body">본문 (글자만 붙여넣기)</label>
+      <textarea id="body" placeholder="발행할 본문을 그대로 붙여넣으세요."></textarea>
+      <div class="row">
+        <div>
+          <label for="photos">직접 찍은 사진 수</label>
+          <input type="number" id="photos" min="0" value="0">
+        </div>
+        <div>
+          <label for="videos">동영상 수</label>
+          <input type="number" id="videos" min="0" value="0">
+        </div>
+        <div>
+          <label for="aiimg">AI로 만든 이미지 사용 여부</label>
+          <select id="aiimg">
+            <option value="no">사용 안 함</option>
+            <option value="marked">사용함 (AI 표시함)</option>
+            <option value="unmarked">사용함 (AI 표시 안 함)</option>
+          </select>
+        </div>
+        <div>
+          <label for="links">내 블로그 다른 글 링크 수</label>
+          <input type="number" id="links" min="0" value="0">
+        </div>
+      </div>
+      <div class="btns">
+        <button class="btn secondary" id="btnExample">예시 입력</button>
+        <button class="btn" id="btnCheck">검사하기</button>
+        <button class="btn secondary" id="btnCopy">결과 복사</button>
+        <button class="btn ghost" id="btnReset">초기화</button>
+      </div>
+      <div class="msg" id="checkMsg"></div>
+      <div class="result" id="result"></div>
+    </div>
+  </section>
+
+  <!-- ② 블로그 상태 기록 -->
+  <section class="panel" id="tab-stats">
+    <div class="card">
+      <h2>블로그 상태 기록표</h2>
+      <p class="hint">네이버 블로그 앱 또는 PC의 <b>내 블로그 → 통계</b>에서 숫자를 보고 매주 한 번 적어 두세요. 추세가 쌓여야 무엇이 효과 있었는지 알 수 있습니다.</p>
+      <div class="row">
+        <div><label for="sDate">기록 날짜</label><input type="date" id="sDate"></div>
+        <div><label for="sTotal">전체 글 수</label><input type="number" id="sTotal" min="0" placeholder="예: 120"></div>
+        <div><label for="sTopic">에어컨·냉난방 주제 글 수</label><input type="number" id="sTopic" min="0" placeholder="예: 12"></div>
+        <div><label for="sRecent">최근 4주 발행 글 수</label><input type="number" id="sRecent" min="0" placeholder="예: 3"></div>
+        <div><label for="sBuddy">이웃 수</label><input type="number" id="sBuddy" min="0" placeholder="예: 5"></div>
+        <div><label for="sVisit">최근 7일 일평균 방문자</label><input type="number" id="sVisit" min="0" placeholder="예: 4"></div>
+        <div><label for="sSearch">검색 유입 비율(%)</label><input type="number" id="sSearch" min="0" max="100" placeholder="예: 30"></div>
+        <div><label for="sPlaceholder">자리표시([ ])가 남은 글 수</label><input type="number" id="sPlaceholder" min="0" placeholder="예: 0"></div>
+      </div>
+      <label for="sKeywords">유입 검색어 상위 5개 (쉼표로 구분)</label>
+      <input type="text" id="sKeywords" placeholder="예: 냉난방기 평형, 구리 에어컨 설치, ...">
+      <div class="btns">
+        <button class="btn" id="btnSaveStat">기록 저장</button>
+        <button class="btn secondary" id="btnCsv">CSV로 저장</button>
+        <button class="btn secondary" id="btnCopyStat">표 복사</button>
+        <button class="btn ghost" id="btnClearStat">기록 전체 삭제</button>
+      </div>
+      <div class="msg" id="statMsg"></div>
+      <div id="statDiag"></div>
+      <h3>기록 목록</h3>
+      <div class="tablewrap"><table id="statTable"><thead><tr><th>날짜</th><th>전체 글</th><th>주제 글</th><th>주제 집중도</th><th>4주 발행</th><th>이웃</th><th>일평균 방문</th><th>검색 유입%</th><th>자리표시 글</th><th>유입 검색어</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- ③ 개선 체크리스트 -->
+  <section class="panel" id="tab-plan">
+    <div class="card">
+      <h2>개선 체크리스트</h2>
+      <p class="hint">위에서부터 순서대로 처리하세요. 체크 상태는 이 컴퓨터에 저장됩니다.</p>
+      <div class="progress"><div id="planBar"></div></div>
+      <div class="small" id="planCount"></div>
+      <div id="planList"></div>
+      <div class="btns">
+        <button class="btn secondary" id="btnCopyPlan">남은 항목 복사</button>
+        <button class="btn ghost" id="btnResetPlan">체크 초기화</button>
+      </div>
+      <div class="msg" id="planMsg"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var $ = function(id){ return document.getElementById(id); };
+  var store = {
+    get: function(k, d){ try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch(e){ return d; } },
+    set: function(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e){ return false; } }
+  };
+  function copyText(text, msgEl){
+    var done = function(){ msgEl.className='msg'; msgEl.textContent='복사했습니다. 붙여넣기(Ctrl+V)로 사용하세요.'; };
+    var fail = function(){ msgEl.className='msg err'; msgEl.textContent='복사가 막혔습니다. 결과를 마우스로 드래그해서 복사해 주세요.'; };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function(){
+        try { var ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); } catch(e){ fail(); }
+      });
+    } else {
+      try { var ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); } catch(e){ fail(); }
+    }
+  }
+
+  /* 탭 */
+  var tabs = document.querySelectorAll('.tabs button');
+  Array.prototype.forEach.call(tabs, function(b){
+    b.addEventListener('click', function(){
+      Array.prototype.forEach.call(tabs, function(x){ x.classList.remove('active'); });
+      Array.prototype.forEach.call(document.querySelectorAll('.panel'), function(p){ p.classList.remove('active'); });
+      b.classList.add('active'); $('tab-'+b.getAttribute('data-tab')).classList.add('active');
+      store.set('wa_tab', b.getAttribute('data-tab'));
+    });
+  });
+  var savedTab = store.get('wa_tab', 'check');
+  Array.prototype.forEach.call(tabs, function(b){ if (b.getAttribute('data-tab')===savedTab) b.click(); });
+
+  /* ───────── ① 발행 전 검사 ───────── */
+  var BANNED = ['1등','최저가','무조건','100%','무료 설치','무료설치','공식 인증','완벽','보장','확실한 절감','역대급','강력 추천','지금 바로 구매','놓치면 후회','이거 하나면 끝','최고 성능','업계 최고'];
+  var ALT = {'1등':'“많이 찾으시는”','최저가':'“합리적인 가격”','무조건':'“대부분의 경우”','100%':'“대부분”','무료 설치':'“기본 설치비 포함(조건 확인)”','무료설치':'“기본 설치비 포함(조건 확인)”','공식 인증':'실제 인증서가 있을 때만 사용','완벽':'“꼼꼼하게”','보장':'“도움이 될 수 있습니다”','확실한 절감':'“줄어들 수 있습니다”','역대급':'삭제','강력 추천':'“조건에 맞으면 권해 드립니다”','지금 바로 구매':'“사진 상담을 먼저 받아 보세요”','놓치면 후회':'삭제','이거 하나면 끝':'삭제','최고 성능':'“용량에 맞는 성능”','업계 최고':'삭제'};
+
+  function escapeReg(s){ return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+  function countOcc(text, kw){ if(!kw) return 0; var m = text.match(new RegExp(escapeReg(kw),'g')); return m ? m.length : 0; }
+
+  function runCheck(){
+    var kw = $('kw').value.trim();
+    var title = $('title').value.trim();
+    var body = $('body').value.replace(/\r/g,'');
+    var photos = parseInt($('photos').value||'0',10);
+    var videos = parseInt($('videos').value||'0',10);
+    var aiimg = $('aiimg').value;
+    var links = parseInt($('links').value||'0',10);
+    var items = [];
+    function add(level, name, text){ items.push({level:level,name:name,text:text}); }
+
+    if (!title && !body) { $('checkMsg').className='msg err'; $('checkMsg').textContent='제목이나 본문을 먼저 넣어 주세요.'; $('result').innerHTML=''; return null; }
+    $('checkMsg').className='msg'; $('checkMsg').textContent='';
+
+    var bodyTrim = body.trim();
+    var lenWith = bodyTrim.length;
+    var lenNoSpace = bodyTrim.replace(/\s/g,'').length;
+
+    /* 1 HTML 코드·깨진 글자 */
+    if (/<\s*(div|span|p|h[1-6]|style|table)\b|class\s*=|style\s*=/i.test(body)) add('fail','HTML 코드 잔존','본문에 HTML 코드(<div>, class= 등)가 그대로 들어 있습니다. 네이버 에디터는 코드 붙여넣기를 지원하지 않으니 글자 내용만 넣어야 합니다.');
+    else add('pass','HTML 코드 잔존','본문에 HTML 코드가 없습니다.');
+    if (/ð|�|Ã/.test(body+title)) add('fail','깨진 글자','“ð”, “�” 같은 깨진 글자가 있습니다. 이모지나 특수문자가 잘못 변환된 흔적이니 지우거나 다시 입력하세요.');
+    else add('pass','깨진 글자','깨진 글자가 없습니다.');
+
+    /* 2 자리표시 */
+    var ph = (title+'\n'+body).match(/\[[^\]\n]{1,80}\]|\{[^}\n]{1,80}\}/g) || [];
+    var phKeys = ['확인 필요','사장님 확인','실제 정보 입력','현장 한마디','스마트스토어 주소','관련 글 링크','대표 사진','사진]','동영상]'];
+    var phHits = ph.filter(function(p){ return phKeys.some(function(k){ return p.indexOf(k)>=0; }) || /\[[^\]]*\]/.test(p); });
+    if (phHits.length) add('fail','자리표시 남음', phHits.length+'곳: '+phHits.slice(0,6).join(' / ')+(phHits.length>6?' 외':'')+' → 실제 내용으로 바꾸거나 문장을 지우세요. 이대로 발행되면 독자와 검색 모두에 미완성 글로 보입니다.');
+    else add('pass','자리표시 남음','[ ] 나 { } 자리표시가 없습니다.');
+
+    /* 3 제목 */
+    var tl = title.length;
+    if (!title) add('fail','제목','제목이 없습니다.');
+    else if (tl < 18) add('warn','제목 길이', tl+'자입니다. 25~35자 정도로 검색어와 상황을 함께 담아 주세요. (예: “냉난방기 평형 계산, 매장은 층고까지 봐야 하는 이유”)');
+    else if (tl > 40) add('warn','제목 길이', tl+'자로 깁니다. 모바일에서 뒷부분이 잘리니 35자 안쪽으로 줄이세요.');
+    else add('pass','제목 길이', tl+'자, 적당합니다.');
+    if (kw) {
+      var pos = title.indexOf(kw);
+      if (pos < 0) add('fail','제목 속 키워드','제목에 핵심 키워드 “'+kw+'”가 없습니다. 제목 맨 앞쪽에 넣으세요.');
+      else if (pos > 15) add('warn','제목 속 키워드','키워드가 제목 '+(pos+1)+'번째 글자에서 시작합니다. 앞 15자 안에 오도록 순서를 바꾸세요.');
+      else add('pass','제목 속 키워드','키워드가 제목 앞부분에 있습니다.');
+    } else add('info','제목 속 키워드','핵심 키워드를 입력하면 제목·본문 배치를 검사합니다.');
+    if (/위너에어컨/.test(title) && title.indexOf('위너에어컨') < 6) add('warn','제목 첫머리 상호','제목이 상호로 시작합니다. “위너에어컨”은 LG 휘센 제품명과 겹쳐 검색 이득이 거의 없으니 검색어를 앞에, 상호는 뒤나 본문으로 보내세요.');
+
+    /* 4 분량 */
+    if (lenWith === 0) add('fail','본문 분량','본문이 없습니다.');
+    else if (lenWith < 1200) add('warn','본문 분량','공백 포함 '+lenWith.toLocaleString()+'자입니다. 1,500자 이상으로 원인·기준·확인 방법을 더 채우세요.');
+    else if (lenWith <= 3200) add('pass','본문 분량','공백 포함 '+lenWith.toLocaleString()+'자(공백 제외 '+lenNoSpace.toLocaleString()+'자), 권장 구간입니다.');
+    else if (lenWith <= 4000) add('warn','본문 분량','공백 포함 '+lenWith.toLocaleString()+'자입니다. 3,000자 안팎이 완독에 유리합니다. 곁가지를 줄이세요.');
+    else add('warn','본문 분량','공백 포함 '+lenWith.toLocaleString()+'자로 깁니다. 두 편으로 나누거나 3,000자 안팎으로 줄이세요. 긴 글은 끝까지 읽히지 않아 체류 신호가 오히려 나빠집니다.');
+
+    /* 5 키워드 횟수 */
+    if (kw && lenWith) {
+      var c = countOcc(body, kw);
+      var density = lenNoSpace ? (c*kw.replace(/\s/g,'').length/lenNoSpace*100) : 0;
+      if (c === 0) add('fail','본문 속 키워드','본문에 “'+kw+'”가 한 번도 없습니다. 첫 문단 1회 + 중간 2~3회 넣으세요.');
+      else if (c > 7) add('warn','본문 속 키워드','본문에 '+c+'회 나옵니다(밀도 '+density.toFixed(1)+'%). 5회 안쪽으로 줄이고 비슷한 말로 바꾸세요. 과다 반복은 감점 요인입니다.');
+      else add('pass','본문 속 키워드','본문에 '+c+'회(밀도 '+density.toFixed(1)+'%), 적당합니다.');
+      var first = body.split(/\n\s*\n/)[0] || body.slice(0,200);
+      if (first.indexOf(kw) < 0) add('warn','첫 문단 키워드','첫 문단에 키워드가 없습니다. 첫 100자 안에 한 번 넣으세요.');
+      else add('pass','첫 문단 키워드','첫 문단에 키워드가 있습니다.');
+    }
+
+    /* 6 정의형 첫 문장 */
+    var firstPara = (bodyTrim.split(/\n\s*\n/)[0] || '').trim();
+    if (firstPara && /(란|이란|는|은)\s.{2,60}(입니다|이에요|예요)|핵심은|정리하면/.test(firstPara)) add('pass','정의형 첫 문단','첫 문단이 “○○란 ~입니다” 형태의 정의·핵심 문장으로 시작합니다. AI 요약 인용에 유리합니다.');
+    else if (firstPara) add('warn','정의형 첫 문단','첫 문단이 정의·핵심 문장으로 시작하지 않습니다. 예: “냉난방기 평형 계산이란 바닥 넓이가 아니라 식히거나 데워야 할 공기의 양을 셈하는 일입니다.”');
+
+    /* 7 소제목 질문형·문단 길이 */
+    var lines = body.split('\n').map(function(l){ return l.trim(); }).filter(Boolean);
+    var qHeads = lines.filter(function(l){ return l.length <= 45 && /[?？]$/.test(l); }).length;
+    if (qHeads >= 2) add('pass','질문형 소제목', qHeads+'개의 질문형 소제목이 있습니다.');
+    else add('warn','질문형 소제목','질문으로 끝나는 짧은 소제목이 '+qHeads+'개입니다. 사람들이 검색창에 치는 질문 그대로 소제목을 2개 이상 만드세요. (예: “실외기에서 김이 나면 고장인가요?”)');
+    var longParas = bodyTrim.split(/\n\s*\n/).filter(function(p){ return p.replace(/\n/g,'').length > 220; }).length;
+    if (longParas) add('warn','긴 문단', longParas+'개 문단이 220자를 넘습니다. 모바일에서 벽처럼 보이니 1~2문장마다 줄을 나누세요.');
+    else if (lenWith) add('pass','긴 문단','벽처럼 긴 문단이 없습니다.');
+
+    /* 8 금지·과장 표현 */
+    var hits = [];
+    BANNED.forEach(function(w){ if ((title+'\n'+body).indexOf(w) >= 0) hits.push(w+' → '+ALT[w]); });
+    if (hits.length) add('fail','과장·단정 표현', hits.join(' / ')+'. 근거 없는 최상급·확정 표현은 광고 규정과 신뢰 모두에 불리합니다.');
+    else add('pass','과장·단정 표현','과장 표현이 없습니다.');
+
+    /* 9 취급하지 않는 서비스 */
+    var svc = (body.match(/(분해\s*세척|세척|수리|이전\s*설치)[^.\n]{0,14}(해\s*드립니다|해드려요|해\s*드려요|가능합니다|전문입니다|예약)/g) || []);
+    if (svc.length) add('warn','취급하지 않는 서비스 표기', svc.slice(0,3).join(' / ')+' → 세척·수리·이전설치를 저희가 해 드리는 것처럼 읽힙니다. 정보로만 설명하고 자사 연결은 구매·교체·신규 설치 상담으로 바꾸세요.');
+    else add('pass','취급하지 않는 서비스 표기','세척·수리·이전설치를 자사 서비스처럼 쓴 문장이 없습니다.');
+
+    /* 10 상호·지역·연락처 */
+    if (/(구리|남양주)\s*위너에어컨/.test(body)) add('pass','지역+상호 표기','“구리 위너에어컨/남양주 위너에어컨” 표기가 있습니다.');
+    else if (/위너에어컨/.test(body)) add('warn','지역+상호 표기','상호가 지역 없이 쓰였습니다. 한 번은 “구리 위너에어컨” 또는 “남양주 위너에어컨”으로 쓰세요. (LG 제품명과 구분)');
+    else add('warn','지역+상호 표기','본문에 상호가 없습니다. 마무리 부분에 “구리·남양주 위너에어컨”을 한 번 넣으세요.');
+    if (body.indexOf('010-9082-2174') >= 0) add('pass','연락처','010-9082-2174 표기가 있습니다.');
+    else add('warn','연락처','마무리에 상담 연락처 010-9082-2174가 없습니다. 스마트스토어 → 전화 순서로 안내하세요.');
+    var otherPhones = (body.match(/01[016789]-?\d{3,4}-?\d{4}/g) || []).filter(function(p){ return p.replace(/-/g,'') !== '01090822174'; });
+    if (otherPhones.length) add('fail','개인정보(전화번호)','업체 번호가 아닌 전화번호가 있습니다: '+otherPhones.join(', ')+'. 고객 번호라면 반드시 지우세요.');
+    if (/\d+\s*동\s*\d+\s*호/.test(body)) add('fail','개인정보(상세 주소)','“○동 ○호” 형태의 상세 주소가 있습니다. 동네 이름 수준(예: 구리 인창동)까지만 쓰세요.');
+    if (/\d{2,3}[가-힣]\s?\d{4}/.test(body)) add('warn','개인정보(차량번호 의심)','차량번호처럼 보이는 숫자가 있습니다. 사진 속 번호판도 가려 주세요.');
+
+    /* 11 사진·동영상·AI 이미지 */
+    if (photos >= 5) add('pass','직접 찍은 사진', photos+'장, 충분합니다. 올리기 전 파일명을 “구리-냉난방기-설치.jpg”처럼 키워드로 바꾸세요.');
+    else if (photos >= 1) add('warn','직접 찍은 사진', photos+'장입니다. 5장 이상이 좋습니다. 현장·제품·리모컨·명판·설치 전후를 찍으세요.');
+    else add('fail','직접 찍은 사진','직접 찍은 사진이 없습니다. 원본 사진은 네이버가 가장 중요하게 보는 “직접 경험” 신호입니다.');
+    if (videos >= 1) add('pass','동영상','동영상 '+videos+'개가 있습니다.');
+    else add('info','동영상','30초~3분 동영상 1개를 넣으면 체류 시간에 도움이 됩니다. (없어도 발행은 가능)');
+    if (aiimg === 'unmarked') add('warn','AI 이미지','AI 이미지를 쓰면서 표시를 안 했습니다. 개념 설명용으로만 쓰고, 글 끝에 “일부 이미지는 AI로 제작”이라고 밝히세요. 실제 시공 사례처럼 보이게 쓰면 안 됩니다.');
+    else if (aiimg === 'marked') add('pass','AI 이미지','AI 이미지 사용을 표시했습니다. 현장 사진을 대신하지는 않도록 하세요.');
+
+    /* 12 링크·댓글 */
+    if (links >= 2 || countOcc(body,'blog.naver.com/as1096') >= 2) add('pass','내 글 연결','다른 글 링크가 2개 이상입니다.');
+    else add('warn','내 글 연결','내 블로그의 다른 글 링크가 '+Math.max(links,countOcc(body,'blog.naver.com/as1096'))+'개입니다. 관련 글 2개를 실제 주소로 연결하면 체류·재방문이 늘어납니다.');
+    if (/smartstore\.naver\.com/.test(body)) add('pass','스마트스토어 링크','스마트스토어 주소가 들어 있습니다.');
+    else add('info','스마트스토어 링크','스마트스토어 주소가 없습니다. 마무리에 실제 스토어 주소를 링크로 넣으세요. (없으면 억지로 만들지 마세요)');
+    if (/댓글/.test(bodyTrim.slice(-400))) add('pass','댓글 유도 질문','마무리에 댓글을 청하는 문장이 있습니다.');
+    else add('warn','댓글 유도 질문','마무리에 가벼운 질문 한 줄을 넣으세요. (예: “여러분 매장은 난방 몇 도로 두시나요? 댓글로 알려 주세요.”)');
+
+    /* 13 경험 신호 */
+    if (/(현장에서|실제로|지난주|얼마 전|최근에|저희가 설치|직접 (봤|보았|재|쟀|측정))/.test(body)) add('pass','직접 경험 문장','현장 경험을 담은 문장이 있습니다.');
+    else add('warn','직접 경험 문장','“현장에서 실제로 있었던 일” 한 문단이 없습니다. 실제 사례를 한 줄이라도 넣으세요. 없으면 “이런 전화를 많이 받습니다” 수준까지만 쓰고 지어내지 마세요.');
+
+    render(items, {kw:kw,title:title,lenWith:lenWith});
+    return items;
+  }
+
+  function render(items, meta){
+    var pass = items.filter(function(i){return i.level==='pass';}).length;
+    var scored = items.filter(function(i){return i.level!=='info';}).length;
+    var fails = items.filter(function(i){return i.level==='fail';}).length;
+    var warns = items.filter(function(i){return i.level==='warn';}).length;
+    var score = scored ? Math.round(pass/scored*100) : 0;
+    var grade = fails ? '발행 전 수정 필요' : (warns > 3 ? '보완하면 좋음' : '발행 가능');
+    var html = '<div class="score"><div class="num">'+score+'점</div><div class="desc"><b>'+grade+'</b><br>통과 '+pass+' · 보완 '+warns+' · 수정 필요 '+fails+'</div></div>';
+    var order = {fail:0,warn:1,pass:2,info:3};
+    items.slice().sort(function(a,b){return order[a.level]-order[b.level];}).forEach(function(i){
+      var label = {fail:'수정',warn:'보완',pass:'통과',info:'참고'}[i.level];
+      html += '<div class="item '+i.level+'"><span class="tag">'+label+'</span><div><b>'+i.name+'</b> — '+i.text+'</div></div>';
+    });
+    $('result').innerHTML = html;
+    window.__lastResult = {score:score, grade:grade, items:items, meta:meta};
+  }
+
+  $('btnCheck').addEventListener('click', runCheck);
+  $('btnCopy').addEventListener('click', function(){
+    var r = window.__lastResult;
+    if (!r) { $('checkMsg').className='msg err'; $('checkMsg').textContent='먼저 검사하기를 눌러 주세요.'; return; }
+    var text = '[블로그 발행 전 검사 결과] '+r.score+'점 · '+r.grade+'\n제목: '+r.meta.title+'\n키워드: '+r.meta.kw+'\n본문: 공백 포함 '+r.meta.lenWith+'자\n\n';
+    r.items.forEach(function(i){ text += '- ['+({fail:'수정',warn:'보완',pass:'통과',info:'참고'}[i.level])+'] '+i.name+': '+i.text+'\n'; });
+    copyText(text, $('checkMsg'));
+  });
+  $('btnReset').addEventListener('click', function(){
+    ['kw','title','body'].forEach(function(id){ $(id).value=''; });
+    $('photos').value=0; $('videos').value=0; $('links').value=0; $('aiimg').value='no';
+    $('result').innerHTML=''; $('checkMsg').textContent=''; window.__lastResult=null;
+  });
+  $('btnExample').addEventListener('click', function(){
+    $('kw').value = '냉난방기 평형 계산';
+    $('title').value = '냉난방기 평형 계산, 매장은 바닥 평수만 보면 안 되는 이유';
+    $('body').value = [
+      '냉난방기 평형 계산이란 바닥 넓이가 아니라 식히거나 데워야 할 공기의 양을 셈하는 일입니다.',
+      '“30평이니까 30평형 하나면 되죠?” 매장 상담에서 가장 자주 듣는 말입니다.',
+      '',
+      '30평인데 왜 30평형으로 부족한가요?',
+      '층고가 6m인 공장은 같은 바닥이라도 공기가 사무실의 두 배가 넘습니다.',
+      '셔터문이 하루 수십 번 열리면 데운 공기가 계속 빠져나갑니다.',
+      '[현장 한마디: 최근 평형을 잘못 고른 손님 사례 한 줄]',
+      '',
+      '평형 계산은 무엇을 먼저 보나요?',
+      '1. 층고 2. 문 여닫는 횟수 3. 주방·기계 열 4. 창 방향 순서로 봅니다.',
+      '가정용 평형표는 층고 2.3m 기준이라 상가·공장에는 그대로 맞지 않습니다.',
+      '현장에서 실제로 있었던 일입니다. 바닥 30평, 층고 6m 공장에 냉난방기 평형 계산을 다시 해 보니 한 대로는 부족해 구역을 나눠 제안했습니다.',
+      '',
+      '이런 경우 냉난방기 평형 계산을 다시 받아 보세요.',
+      '- 리모컨은 24도인데 매장은 28도에서 안 내려간다',
+      '- 겨울에 발밑만 계속 차갑다',
+      '',
+      '사기 전에 천장·출입문·주방·차단기 사진 4장만 보내 주시면 방향은 나옵니다.',
+      '구리 위너에어컨은 무조건 최저가는 아니지만 현장 조건을 먼저 봅니다.',
+      '스마트스토어에서 제품을 보시고, 설치 조건은 010-9082-2174로 편하게 문의 주세요.',
+      '여러분 매장은 층고가 몇 m인가요? 댓글로 알려 주세요.'
+    ].join('\n');
+    $('photos').value = 3; $('videos').value = 0; $('links').value = 0; $('aiimg').value = 'no';
+    $('checkMsg').className='msg'; $('checkMsg').textContent='예시를 넣었습니다. “검사하기”를 눌러 보세요. (일부러 고칠 거리를 넣어 두었습니다)';
+  });
+
+  /* ───────── ② 블로그 상태 기록 ───────── */
+  var STAT_KEY = 'wa_blog_stats';
+  function num(id){ var v = $(id).value; return v === '' ? null : Number(v); }
+  function todayStr(){ var d=new Date(); var m=('0'+(d.getMonth()+1)).slice(-2), day=('0'+d.getDate()).slice(-2); return d.getFullYear()+'-'+m+'-'+day; }
+  if (!$('sDate').value) $('sDate').value = todayStr();
+
+  function diagnose(s){
+    var out = [];
+    var ratio = (s.total && s.topic !== null) ? Math.round(s.topic/s.total*100) : null;
+    if (ratio !== null) out.push(ratio >= 70 ? {l:'pass',t:'주제 집중도 '+ratio+'% — 에어컨·냉난방 글 비중이 충분합니다.'} : {l:'warn',t:'주제 집중도 '+ratio+'% — 전체 글 중 냉난방 주제가 적습니다. 예전 글을 한꺼번에 지우지 말고 새 글을 꾸준히 쌓아 70% 이상으로 올리세요.'});
+    if (s.recent !== null) out.push(s.recent >= 8 ? {l:'pass',t:'최근 4주 '+s.recent+'편 — 주 2회 리듬을 지키고 있습니다.'} : {l:'warn',t:'최근 4주 '+s.recent+'편 — 주 2회(4주 8편)가 목표입니다. 요일을 정해 규칙적으로 올리세요.'});
+    if (s.buddy !== null) out.push(s.buddy >= 30 ? {l:'pass',t:'이웃 '+s.buddy+'명 — 발행 직후 초기 반응을 받을 기반이 있습니다.'} : {l:'warn',t:'이웃 '+s.buddy+'명 — 검색 말고는 글을 볼 사람이 거의 없습니다. 구리·남양주 자영업·인테리어 블로거와 자연스럽게 이웃을 늘리세요(자동 프로그램 금지).'});
+    if (s.search !== null) out.push(s.search >= 50 ? {l:'pass',t:'검색 유입 '+s.search+'% — 검색이 주 유입입니다. 유입 검색어를 다음 글 주제로 쓰세요.'} : {l:'warn',t:'검색 유입 '+s.search+'% — 검색 노출이 아직 약합니다. 세부 키워드 글과 원본 사진을 늘리고 2~3개월 추세를 보세요.'});
+    if (s.placeholder) out.push({l:'fail',t:'자리표시가 남은 글 '+s.placeholder+'편 — 오늘 바로 수정하세요. 미완성 글은 블로그 전체 신뢰를 깎습니다.'});
+    if (s.visit !== null && s.visit < 10) out.push({l:'info',t:'일평균 방문 '+s.visit+'명 — 지금은 숫자보다 “검색 유입 글 수”와 “유입 검색어 종류”가 늘어나는지를 보세요.'});
+    return out;
+  }
+  function renderStats(){
+    var list = store.get(STAT_KEY, []);
+    var tb = $('statTable').querySelector('tbody'); tb.innerHTML='';
+    list.forEach(function(s, idx){
+      var ratio = (s.total && s.topic !== null) ? Math.round(s.topic/s.total*100)+'%' : '';
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>'+s.date+'</td><td>'+v(s.total)+'</td><td>'+v(s.topic)+'</td><td>'+ratio+'</td><td>'+v(s.recent)+'</td><td>'+v(s.buddy)+'</td><td>'+v(s.visit)+'</td><td>'+v(s.search)+'</td><td>'+v(s.placeholder)+'</td><td>'+(s.keywords||'')+'</td><td><button class="btn ghost" data-del="'+idx+'" style="padding:4px 8px;font-size:12px">삭제</button></td>';
+      tb.appendChild(tr);
+    });
+    Array.prototype.forEach.call(tb.querySelectorAll('button[data-del]'), function(b){
+      b.addEventListener('click', function(){ var l = store.get(STAT_KEY, []); l.splice(Number(b.getAttribute('data-del')),1); store.set(STAT_KEY,l); renderStats(); });
+    });
+  }
+  function v(x){ return (x===null||x===undefined) ? '' : x; }
+  $('btnSaveStat').addEventListener('click', function(){
+    var s = {date:$('sDate').value||todayStr(), total:num('sTotal'), topic:num('sTopic'), recent:num('sRecent'), buddy:num('sBuddy'), visit:num('sVisit'), search:num('sSearch'), placeholder:num('sPlaceholder'), keywords:$('sKeywords').value.trim()};
+    if (s.total===null && s.recent===null && s.visit===null) { $('statMsg').className='msg err'; $('statMsg').textContent='전체 글 수, 최근 4주 발행 수, 방문자 중 하나는 적어 주세요.'; return; }
+    if (s.topic !== null && s.total !== null && s.topic > s.total) { $('statMsg').className='msg err'; $('statMsg').textContent='주제 글 수가 전체 글 수보다 많을 수 없습니다. 숫자를 다시 확인해 주세요.'; return; }
+    var list = store.get(STAT_KEY, []); list.push(s); list.sort(function(a,b){ return a.date < b.date ? -1 : 1; });
+    var ok = store.set(STAT_KEY, list);
+    $('statMsg').className = ok ? 'msg' : 'msg err'; $('statMsg').textContent = ok ? '저장했습니다.' : '브라우저 저장이 막혀 있어 화면에만 표시됩니다. CSV로 저장해 두세요.';
+    var d = diagnose(s); $('statDiag').innerHTML = d.map(function(i){ return '<div class="item '+i.l+'"><span class="tag">'+({pass:'좋음',warn:'보완',fail:'수정',info:'참고'}[i.l])+'</span><div>'+i.t+'</div></div>'; }).join('');
+    renderStats();
+  });
+  function statsCsv(){
+    var list = store.get(STAT_KEY, []);
+    var rows = [['날짜','전체 글','주제 글','주제 집중도(%)','최근 4주 발행','이웃','일평균 방문','검색 유입(%)','자리표시 글','유입 검색어']];
+    list.forEach(function(s){ var ratio=(s.total&&s.topic!==null)?Math.round(s.topic/s.total*100):''; rows.push([s.date,v(s.total),v(s.topic),ratio,v(s.recent),v(s.buddy),v(s.visit),v(s.search),v(s.placeholder),(s.keywords||'')]); });
+    return rows.map(function(r){ return r.map(function(c){ c=String(c); return /[",\n]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c; }).join(','); }).join('\r\n');
+  }
+  $('btnCsv').addEventListener('click', function(){
+    var list = store.get(STAT_KEY, []);
+    if (!list.length) { $('statMsg').className='msg err'; $('statMsg').textContent='저장된 기록이 없습니다.'; return; }
+    var blob = new Blob(['﻿'+statsCsv()], {type:'text/csv;charset=utf-8'});
+    var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'blog_stats_'+todayStr()+'.csv'; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    $('statMsg').className='msg'; $('statMsg').textContent='CSV 파일을 내려받았습니다. (엑셀에서 한글이 깨지지 않도록 저장했습니다)';
+  });
+  $('btnCopyStat').addEventListener('click', function(){ if(!store.get(STAT_KEY,[]).length){ $('statMsg').className='msg err'; $('statMsg').textContent='저장된 기록이 없습니다.'; return; } copyText(statsCsv().replace(/,/g,'\t'), $('statMsg')); });
+  $('btnClearStat').addEventListener('click', function(){ if (confirm('기록을 모두 지울까요? 되돌릴 수 없습니다.')) { store.set(STAT_KEY, []); renderStats(); $('statDiag').innerHTML=''; $('statMsg').className='msg'; $('statMsg').textContent='기록을 지웠습니다.'; } });
+  renderStats();
+
+  /* ───────── ③ 개선 체크리스트 ───────── */
+  var PLAN = [
+    {phase:'오늘 (1시간)', items:[
+      '발행된 글을 휴대폰으로 열어 [대표 사진], [스마트스토어 주소], [현장 한마디], [사장님 확인] 같은 자리표시가 남았는지 확인하고 수정',
+      '본문에 HTML 코드 조각, 깨진 글자(ð), 겹친 카드가 보이는 글을 찾아 네이버 에디터 기본 요소(인용구·구분선·굵게·글자색)로 다시 정리',
+      '블로그 통계에서 전체 글 수, 냉난방 주제 글 수, 이웃 수, 최근 7일 방문자, 검색 유입 비율을 ② 기록표에 첫 기록으로 저장',
+      '프로필 별명·블로그명·소개글에 “구리·남양주 에어컨·냉난방기 판매·설치 위너에어컨 · 010-9082-2174”가 들어가도록 수정'
+    ]},
+    {phase:'이번 주', items:[
+      '카테고리를 “냉난방 정보·팁 / 설치 사례(구리·남양주) / 안내” 3개로 정리하고 새 글은 반드시 이 안에 발행',
+      '글 주제 설정을 한 가지로 고정(예: 인테리어·DIY 또는 상품리뷰)해 모든 새 글에 같은 주제 적용 [확인 필요: 현재 설정]',
+      '스마트스토어 상품 상세·공지, 스레드·인스타 프로필, 구글 비즈니스 프로필에 블로그 주소 링크 추가',
+      '네이버 스마트플레이스에 “위너에어컨”이 등록되어 있는지 확인하고, 없으면 등록·있으면 블로그 주소와 전화번호 일치 확인',
+      '광고 키워드도구(searchad.naver.com)에서 키워드 목록 파일의 검색량을 5개씩 확인해 월 500~5,000 구간의 세부 키워드 10개 고르기'
+    ]},
+    {phase:'4주', items:[
+      '주 2회 고정 요일(예: 화·금)에 정보 글 1편 + 설치 사례 글 1편 발행 (현장 사진 5장 이상, 파일명은 키워드)',
+      '모든 새 글을 ① 발행 전 검사기로 검사해 “수정 필요” 0개일 때만 발행',
+      '발행 직후 스레드·인스타에 공유하고, 당일 댓글에는 반드시 답글',
+      '구리·남양주 자영업·인테리어·부동산 블로거 30명과 자연스럽게 이웃 소통 (자동 프로그램·품앗이 금지)',
+      '새 글마다 “함께 보면 좋은 글” 2개를 실제 주소로 연결'
+    ]},
+    {phase:'3개월', items:[
+      '매주 ② 기록표를 채우고 유입 검색어를 다음 글 주제로 사용',
+      '예전 일상·다른 주제 글은 삭제하지 말고, 냉난방 글이 전체의 70%를 넘을 때까지 새 글로 비중 역전',
+      '검색 유입이 생긴 글 3편을 골라 사진·수치·현장 한마디를 보강해 수정 발행',
+      '3개월 뒤 검색 유입 글 수, 유입 검색어 종류, 스토어·전화 문의 수를 첫 기록과 비교'
+    ]}
+  ];
+  var PLAN_KEY = 'wa_plan_done';
+  function renderPlan(){
+    var done = store.get(PLAN_KEY, {});
+    var html = ''; var total=0, cnt=0;
+    PLAN.forEach(function(p, pi){
+      html += '<div class="phase">'+p.phase+'</div>';
+      p.items.forEach(function(t, ii){
+        var key = pi+'-'+ii; total++; if (done[key]) cnt++;
+        html += '<label class="check'+(done[key]?' done':'')+'"><input type="checkbox" data-key="'+key+'"'+(done[key]?' checked':'')+'><span>'+t+'</span></label>';
+      });
+    });
+    $('planList').innerHTML = html;
+    $('planBar').style.width = (total?Math.round(cnt/total*100):0)+'%';
+    $('planCount').textContent = '완료 '+cnt+' / '+total;
+    Array.prototype.forEach.call($('planList').querySelectorAll('input[type=checkbox]'), function(cb){
+      cb.addEventListener('change', function(){ var d = store.get(PLAN_KEY, {}); if (cb.checked) d[cb.getAttribute('data-key')]=true; else delete d[cb.getAttribute('data-key')]; store.set(PLAN_KEY,d); renderPlan(); });
+    });
+  }
+  $('btnCopyPlan').addEventListener('click', function(){
+    var done = store.get(PLAN_KEY, {}); var text='[위너에어컨 블로그 개선 — 남은 항목]\n';
+    PLAN.forEach(function(p,pi){ var rest = p.items.filter(function(t,ii){ return !done[pi+'-'+ii]; }); if (rest.length){ text += '\n'+p.phase+'\n'; rest.forEach(function(t){ text += '- '+t+'\n'; }); } });
+    copyText(text, $('planMsg'));
+  });
+  $('btnResetPlan').addEventListener('click', function(){ if (confirm('체크 상태를 모두 지울까요?')) { store.set(PLAN_KEY, {}); renderPlan(); } });
+  renderPlan();
+})();
+</script>
+</body>
+</html>
